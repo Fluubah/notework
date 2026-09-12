@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { AppSkeleton } from './components/AppSkeleton'
 import { ToastHost } from './components/Toast'
 import { useStore } from './data/store'
 import { useUi } from './data/uiStore'
@@ -40,7 +41,7 @@ export function App() {
     [ui.shortcutsOpen],
   )
 
-  if (!hydrated) return null
+  if (!hydrated) return <AppSkeleton sidebarOpen={sidebarOpen} />
 
   return (
     <div className={`app ${sidebarOpen ? 'sidebar-open-mobile' : 'sidebar-collapsed'}`}>
