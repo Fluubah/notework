@@ -1,5 +1,5 @@
 import { format, isSameDay } from 'date-fns'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { IconCheck, IconClock, IconEdit, IconLink, IconNotes, IconPdf, IconRepeat, IconTrash, IconClose } from '../../components/Icons'
 import { Popover, type Anchor } from '../../components/Popover'
 import { useStore } from '../../data/store'
@@ -7,10 +7,18 @@ import { useUi } from '../../data/uiStore'
 import { useNow } from '../../hooks/useNow'
 import { formatTimeRange, relativeDue, formatShortDate } from '../../lib/dates'
 import { describeRecurrence, findOccurrence } from '../../lib/recurrence'
-import { useCategoryColor } from './EventChip'
+import { useCategoryColor } from './useCategoryColor'
 import { deleteOccurrenceOrSeries, kindVerb, KIND_LABEL } from './eventOps'
 import { useSeriesScope } from './SeriesScopeDialog'
 import { LinkPicker } from '../links/LinkPicker'
+
+/** Screen position of an event chip, or a sensible fallback if it scrolled out. */
+function measureOccurrence(occId: string): Anchor {
+  const el = document.querySelector<HTMLElement>(`[data-occ-id="${CSS.escape(occId)}"]`)
+  if (!el) return { x: window.innerWidth / 2 - 160, y: 120 }
+  const rect = el.getBoundingClientRect()
+  return { x: rect.right, y: rect.top, rect }
+}
 
 /** Detail card shown when an event chip is clicked. */
 export function OccurrencePopover() {
@@ -19,22 +27,17 @@ export function OccurrencePopover() {
   const openEditor = useUi((s) => s.openEditor)
   const events = useStore((s) => s.events)
   const occ = useMemo(() => (selectedId ? findOccurrence(events, selectedId) : null), [events, selectedId])
-  const [anchor, setAnchor] = useState<Anchor | null>(null)
   const scope = useSeriesScope()
 
-  useEffect(() => {
-    if (!selectedId) {
-      setAnchor(null)
-      return
-    }
-    const el = document.querySelector<HTMLElement>(`[data-occ-id="${CSS.escape(selectedId)}"]`)
-    if (el) {
-      const rect = el.getBoundingClientRect()
-      setAnchor({ x: rect.right, y: rect.top, rect })
-    } else {
-      setAnchor({ x: window.innerWidth / 2 - 160, y: 120 })
-    }
-  }, [selectedId])
+  // The popover anchors to the chip that was clicked, which is already on
+  // screen from a previous commit. Measuring while rendering the selection
+  // change keeps the popover and its anchor in the same paint, instead of
+  // committing a mispositioned popover and correcting it from an effect.
+  const [anchorState, setAnchorState] = useState<{ forId: string | null; anchor: Anchor | null }>({ forId: null, anchor: null })
+  if (anchorState.forId !== selectedId) {
+    setAnchorState({ forId: selectedId, anchor: selectedId ? measureOccurrence(selectedId) : null })
+  }
+  const anchor = anchorState.anchor
 
   // Keep the tree shape stable so the scope dialog never remounts mid-click.
   return (

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Modal'
-import { toast } from '../../components/Toast'
+import { toast } from '../../components/toastStore'
 import { repository } from '../../data'
 import { useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'

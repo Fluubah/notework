@@ -8,7 +8,8 @@ import { NoteEditor } from './NoteEditor'
 import { NotesTree } from './NotesTree'
 const PdfViewerPane = lazy(() => import('../pdf/PdfViewerPane').then((m) => ({ default: m.PdfViewerPane })))
 import { FolderDialog } from './FolderDialog'
-import { importPdfFiles, PdfUploadButton } from '../pdf/PdfUploadButton'
+import { PdfUploadButton } from '../pdf/PdfUploadButton'
+import { importPdfFiles } from '../pdf/importPdfFiles'
 import { IconNotes } from '../../components/Icons'
 
 export function NotesPage() {

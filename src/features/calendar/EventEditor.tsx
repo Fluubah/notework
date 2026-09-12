@@ -1,8 +1,8 @@
 import { addDays, differenceInMilliseconds, format, parse, parseISO, startOfDay } from 'date-fns'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IconRepeat, IconTrash } from '../../components/Icons'
 import { Modal } from '../../components/Modal'
-import { toast } from '../../components/Toast'
+import { toast } from '../../components/toastStore'
 import { useStore } from '../../data/store'
 import { useUi, type EditorState } from '../../data/uiStore'
 import { UNCATEGORIZED_COLOR } from '../../lib/colors'
@@ -99,11 +99,14 @@ function EventEditorInner({ state, onClose }: { state: EditorState; onClose: () 
   const events = useStore((s) => s.events)
   const { addEvent, updateEvent, updateSeries, updateOccurrence } = useStore()
   const setCategoriesOpen = useUi((s) => s.setCategoriesOpen)
-  const lastCategoryId = useMemo(() => {
+  // Default category for a new event: whichever one was used most recently.
+  // Only read when the editor opens, so capture it in the form initialiser
+  // rather than a memo that would go stale behind an empty dependency list.
+  const [form, setForm] = useState<Form>(() => {
     const last = [...events].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]
-    return last?.categoryId ?? categories[0]?.id ?? null
-  }, [])
-  const [form, setForm] = useState<Form>(() => initialForm(state, lastCategoryId))
+    const lastCategoryId = last?.categoryId ?? categories[0]?.id ?? null
+    return initialForm(state, lastCategoryId)
+  })
   const occ = state.occurrence
   const isRecurringEdit = state.mode === 'edit' && !!occ?.isRecurring
   const [scope, setScope] = useState<SeriesScope>(isRecurringEdit ? 'occurrence' : 'series')

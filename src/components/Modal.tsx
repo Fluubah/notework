@@ -16,8 +16,13 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, children, footer, wide, dismissible = true, className }: ModalProps) {
   const ref = useRef<HTMLDivElement>(null)
+  // Latest callback via a ref so the key listener is registered once per open
+  // rather than re-armed on every render. Updated after commit, which is
+  // always before the listener can fire.
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     if (!open) return

@@ -1,8 +1,7 @@
 import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from 'react'
-import { useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
-import { UNCATEGORIZED_COLOR } from '../../lib/colors'
 import { formatCompactTime } from '../../lib/dates'
+import { useCategoryColor } from './useCategoryColor'
 import type { Occurrence } from '../../types/models'
 
 interface Props {
@@ -14,11 +13,6 @@ interface Props {
   showTime?: boolean
   onPointerDown?: (e: PointerEvent<HTMLDivElement>) => void
   children?: ReactNode
-}
-
-export function useCategoryColor(categoryId: string | null): string {
-  const cat = useStore((s) => (categoryId ? s.categories.find((c) => c.id === categoryId) : undefined))
-  return cat?.color ?? UNCATEGORIZED_COLOR
 }
 
 export function EventChip({ occ, style, className = '', short, showTime = true, onPointerDown, children }: Props) {

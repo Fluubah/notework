@@ -19,7 +19,7 @@ export function CalendarPage() {
     if (view === 'month') return format(anchor, 'MMMM yyyy')
     const { start, end } = weekRange(anchor, weekStartsOn)
     return formatRangeTitle(start, end)
-  }, [anchor.getTime(), view, weekStartsOn])
+  }, [anchor, view, weekStartsOn])
 
   const go = (dir: -1 | 1) => ui.setAnchorDate(view === 'month' ? addMonths(anchor, dir) : addWeeks(anchor, dir))
   const today = () => ui.setAnchorDate(new Date())

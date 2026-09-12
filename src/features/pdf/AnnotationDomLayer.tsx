@@ -59,8 +59,15 @@ function TextBox({ a, scale, selected, onSelect, pageSize, interactive }: { a: T
   const deleteAnnotation = useStore((s) => s.deleteAnnotation)
   const taRef = useRef<HTMLTextAreaElement>(null)
   const [text, setText] = useState(a.text)
+  // The textarea holds a local draft that is committed on blur. When the
+  // stored text changes underneath us (undo, or an edit from elsewhere),
+  // adopt it during render rather than committing the stale draft first.
+  const [syncedText, setSyncedText] = useState(a.text)
+  if (syncedText !== a.text) {
+    setSyncedText(a.text)
+    setText(a.text)
+  }
 
-  useEffect(() => setText(a.text), [a.text])
   useEffect(() => {
     if (!selected || a.text !== '') return
     // Focus after the current pointer sequence settles.
@@ -142,18 +149,28 @@ function TextBox({ a, scale, selected, onSelect, pageSize, interactive }: { a: T
 function Sticky({ a, scale, selected, onSelect, interactive }: { a: StickyAnnotation; scale: number; selected: boolean; onSelect: (id: string | null) => void; interactive: boolean }) {
   const updateAnnotation = useStore((s) => s.updateAnnotation)
   const deleteAnnotation = useStore((s) => s.deleteAnnotation)
-  const ref = useRef<HTMLDivElement>(null)
-  const [anchor, setAnchor] = useState<Anchor | null>(null)
+  // Held as state rather than a ref so the marker can be measured during the
+  // render that opens the popover (see below).
+  const [markerEl, setMarkerEl] = useState<HTMLDivElement | null>(null)
   const [text, setText] = useState(a.text)
   const moved = useRef(false)
 
-  useEffect(() => setText(a.text), [a.text])
-  useEffect(() => {
-    if (selected && ref.current) {
-      const r = ref.current.getBoundingClientRect()
-      setAnchor({ x: r.right, y: r.top, rect: r })
-    } else setAnchor(null)
-  }, [selected])
+  // See TextBox: adopt an externally changed note body during render.
+  const [syncedText, setSyncedText] = useState(a.text)
+  if (syncedText !== a.text) {
+    setSyncedText(a.text)
+    setText(a.text)
+  }
+
+  // The note marker is already committed to the DOM by the time it can be
+  // selected, so measure it as the selection changes instead of opening the
+  // popover unanchored and repositioning it from an effect.
+  const [anchorState, setAnchorState] = useState<{ open: boolean; anchor: Anchor | null }>({ open: false, anchor: null })
+  if (anchorState.open !== selected) {
+    const r = selected ? markerEl?.getBoundingClientRect() : undefined
+    setAnchorState({ open: selected, anchor: r ? { x: r.right, y: r.top, rect: r } : null })
+  }
+  const anchor = anchorState.anchor
 
   const drag = useDrag(
     (dx, dy) => {
@@ -169,7 +186,7 @@ function Sticky({ a, scale, selected, onSelect, interactive }: { a: StickyAnnota
   return (
     <>
       <div
-        ref={ref}
+        ref={setMarkerEl}
         className="ann-sticky"
         style={{ left: a.x * scale, top: a.y * scale, background: a.color, pointerEvents: interactive ? 'auto' : 'none' }}
         {...drag}

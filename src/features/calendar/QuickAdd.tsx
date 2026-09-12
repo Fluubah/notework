@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { IconSparkle } from '../../components/Icons'
-import { toast } from '../../components/Toast'
+import { toast } from '../../components/toastStore'
 import { useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
 import { UNCATEGORIZED_COLOR } from '../../lib/colors'

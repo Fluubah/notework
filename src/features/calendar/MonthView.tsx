@@ -17,14 +17,16 @@ export function MonthView() {
   const setView = useUi((s) => s.setCalendarView)
   const weekStartsOn = useStore((s) => s.settings.weekStartsOn)
 
-  const monthStart = startOfMonth(anchor)
-  const gridStart = startOfWeek(monthStart, { weekStartsOn })
-  const gridEnd = endOfWeek(endOfMonth(monthStart), { weekStartsOn })
+  // Memoised so the grid bounds keep a stable identity across renders; the
+  // memos below depend on them directly.
+  const monthStart = useMemo(() => startOfMonth(anchor), [anchor])
+  const gridStart = useMemo(() => startOfWeek(monthStart, { weekStartsOn }), [monthStart, weekStartsOn])
+  const gridEnd = useMemo(() => endOfWeek(endOfMonth(monthStart), { weekStartsOn }), [monthStart, weekStartsOn])
   const days = useMemo(() => {
     const out: Date[] = []
     for (let d = gridStart; d <= gridEnd; d = addDays(d, 1)) out.push(d)
     return out
-  }, [gridStart.getTime(), gridEnd.getTime()])
+  }, [gridStart, gridEnd])
   const weeks = days.length / 7
 
   const occurrences = useOccurrences(gridStart, new Date(gridEnd.getTime() + 86_400_000 - 1))

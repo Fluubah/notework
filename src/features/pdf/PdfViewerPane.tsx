@@ -14,8 +14,9 @@ import {
   IconDownload,
 } from '../../components/Icons'
 import { ConfirmDialog } from '../../components/Modal'
-import { Popover, anchorFromEvent, type Anchor } from '../../components/Popover'
-import { toast } from '../../components/Toast'
+import { Popover, type Anchor } from '../../components/Popover'
+import { anchorFromEvent } from '../../components/popoverAnchor'
+import { toast } from '../../components/toastStore'
 import { Tooltip } from '../../components/Tooltip'
 import { fileStore } from '../../data'
 import { useStore } from '../../data/store'
@@ -374,7 +375,7 @@ export function PdfViewerPane({ pdf }: { pdf: PdfDocument }) {
             />
           ))}
         {!doc && !error && (
-          <div className="pdf-page-wrap loading" style={{ width: Math.min(700, (scrollRef.current?.clientWidth ?? 800) - 40), height: 900 }} />
+          <div className="pdf-page-wrap loading" style={{ width: 'min(700px, calc(100% - 40px))', height: 900 }} />
         )}
       </div>
 

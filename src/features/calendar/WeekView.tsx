@@ -28,7 +28,7 @@ export function WeekView() {
   const weekStartsOn = useStore((s) => s.settings.weekStartsOn)
   const dayStartHour = useStore((s) => s.settings.dayStartHour)
   const now = useNow(30_000)
-  const { days, start, end } = useMemo(() => weekRange(anchor, weekStartsOn), [anchor.getTime(), weekStartsOn])
+  const { days, start, end } = useMemo(() => weekRange(anchor, weekStartsOn), [anchor, weekStartsOn])
   const occurrences = useOccurrences(startOfDay(start), endOfDay(end))
   const bodyRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)

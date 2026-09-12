@@ -1,5 +1,5 @@
 import { addMilliseconds, differenceInCalendarDays, parseISO } from 'date-fns'
-import { toast } from '../../components/Toast'
+import { toast } from '../../components/toastStore'
 import { useStore } from '../../data/store'
 import { toISO } from '../../lib/dates'
 import type { CalendarEvent, Occurrence, Weekday } from '../../types/models'
