@@ -59,14 +59,29 @@ export interface UiState {
   setNotesFilter(f: { categoryId: string | null; folderId: string | null } | null): void
 }
 
+const PREFS_KEY = 'notework:ui:v1'
+interface UiPrefs {
+  section?: Section
+  calendarView?: CalendarView
+  sidebarOpen?: boolean
+}
+function loadPrefs(): UiPrefs {
+  try {
+    return JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}') as UiPrefs
+  } catch {
+    return {}
+  }
+}
+const prefs = typeof localStorage !== 'undefined' ? loadPrefs() : {}
+
 export const useUi = create<UiState>()((set) => ({
-  section: 'calendar',
+  section: prefs.section ?? 'calendar',
   setSection: (section) => set({ section }),
-  calendarView: 'week',
+  calendarView: prefs.calendarView ?? 'week',
   setCalendarView: (calendarView) => set({ calendarView }),
   anchorDate: new Date(),
   setAnchorDate: (anchorDate) => set({ anchorDate }),
-  sidebarOpen: true,
+  sidebarOpen: prefs.sidebarOpen ?? true,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   editor: null,
   openEditor: (editor) => set({ editor, selectedOccurrenceId: null }),
@@ -97,3 +112,15 @@ export const useUi = create<UiState>()((set) => ({
   notesFilter: null,
   setNotesFilter: (notesFilter) => set({ notesFilter }),
 }))
+
+if (typeof localStorage !== 'undefined') {
+  useUi.subscribe((s, prev) => {
+    if (s.section !== prev.section || s.calendarView !== prev.calendarView || s.sidebarOpen !== prev.sidebarOpen) {
+      try {
+        localStorage.setItem(PREFS_KEY, JSON.stringify({ section: s.section, calendarView: s.calendarView, sidebarOpen: s.sidebarOpen } satisfies UiPrefs))
+      } catch {
+        /* storage may be unavailable; prefs are optional */
+      }
+    }
+  })
+}

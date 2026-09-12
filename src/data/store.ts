@@ -39,6 +39,8 @@ export interface AppState extends AppData {
   /** Edit one occurrence of a recurring event. */
   updateOccurrence(id: string, originalStart: string, patch: OccurrenceOverride): void
   deleteEvent(id: string): void
+  /** Re-insert a previously deleted/replaced event as-is (undo). */
+  restoreEvent(event: CalendarEvent): void
   deleteOccurrence(id: string, originalStart: string): void
   toggleCompleted(id: string, originalStart: string | null): void
 
@@ -134,6 +136,9 @@ export const useStore = create<AppState>()((set, get) => ({
   },
   deleteEvent(id) {
     set((s) => ({ events: s.events.filter((e) => e.id !== id) }))
+  },
+  restoreEvent(event) {
+    set((s) => ({ events: [...s.events.filter((e) => e.id !== event.id), event] }))
   },
   deleteOccurrence(id, originalStart) {
     set((s) => ({ events: s.events.map((e) => (e.id === id ? { ...withOccurrenceDeleted(e, originalStart), updatedAt: now() } : e)) }))

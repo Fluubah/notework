@@ -1,4 +1,5 @@
 import { addMilliseconds, differenceInCalendarDays, parseISO } from 'date-fns'
+import { toast } from '../../components/Toast'
 import { useStore } from '../../data/store'
 import { toISO } from '../../lib/dates'
 import type { CalendarEvent, Occurrence, Weekday } from '../../types/models'
@@ -46,8 +47,15 @@ export function applyTimeChange(occ: Occurrence, newStart: Date, newEnd: Date, s
 
 export function deleteOccurrenceOrSeries(occ: Occurrence, scope: SeriesScope) {
   const store = useStore.getState()
-  if (!occ.isRecurring || scope === 'series') store.deleteEvent(occ.eventId)
+  const before = store.events.find((e) => e.id === occ.eventId)
+  if (!before) return
+  const wholeSeries = !occ.isRecurring || scope === 'series'
+  if (wholeSeries) store.deleteEvent(occ.eventId)
   else store.deleteOccurrence(occ.eventId, occ.originalStart)
+  toast(wholeSeries ? `Deleted “${occ.title}”` : `Removed this “${occ.title}”`, {
+    actionLabel: 'Undo',
+    onAction: () => useStore.getState().restoreEvent(before),
+  })
 }
 
 /** Verb used in relative labels for a given kind. */

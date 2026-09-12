@@ -6,11 +6,12 @@ import { fileStore } from '../../data'
 import { useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
 import { newId } from '../../lib/ids'
-import { loadPdf } from './pdfjs'
 
 export async function importPdfFiles(files: File[]): Promise<number> {
   const { addPdf } = useStore.getState()
   const filter = useUi.getState().notesFilter
+  // pdf.js is heavy; only load it once someone actually imports a PDF.
+  const { loadPdf } = await import('./pdfjs')
   let count = 0
   for (const file of files) {
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) continue

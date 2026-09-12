@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { IconFolderPlus, IconPlus, IconSearch, IconSidebar } from '../../components/Icons'
 import { Tooltip } from '../../components/Tooltip'
 import { useStore } from '../../data/store'
@@ -6,7 +6,7 @@ import { useUi } from '../../data/uiStore'
 import { MOD } from '../../hooks/useHotkeys'
 import { NoteEditor } from './NoteEditor'
 import { NotesTree } from './NotesTree'
-import { PdfViewerPane } from '../pdf/PdfViewerPane'
+const PdfViewerPane = lazy(() => import('../pdf/PdfViewerPane').then((m) => ({ default: m.PdfViewerPane })))
 import { FolderDialog } from './FolderDialog'
 import { importPdfFiles, PdfUploadButton } from '../pdf/PdfUploadButton'
 import { IconNotes } from '../../components/Icons'
@@ -85,7 +85,9 @@ export function NotesPage() {
         {selectedNote ? (
           <NoteEditor key={selectedNote.id} note={selectedNote} />
         ) : selectedPdf ? (
-          <PdfViewerPane key={selectedPdf.id} pdf={selectedPdf} />
+          <Suspense fallback={<div className="pdf-pane" />}>
+            <PdfViewerPane key={selectedPdf.id} pdf={selectedPdf} />
+          </Suspense>
         ) : (
           <div className="note-empty-pane">
             <div className="empty">

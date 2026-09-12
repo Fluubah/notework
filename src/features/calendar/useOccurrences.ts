@@ -9,10 +9,13 @@ export function useOccurrences(start: Date, end: Date, opts: { includeHidden?: b
   const events = useStore((s) => s.events)
   const showCompleted = useStore((s) => s.settings.showCompleted)
   const hidden = useUi((s) => s.hiddenCategoryIds)
+  const startMs = start.getTime()
+  const endMs = end.getTime()
+  const includeHidden = opts.includeHidden ?? false
   return useMemo(() => {
-    let occ = expandEvents(events, start, end)
-    if (!opts.includeHidden && hidden.size > 0) occ = occ.filter((o) => !o.categoryId || !hidden.has(o.categoryId))
+    let occ = expandEvents(events, new Date(startMs), new Date(endMs))
+    if (!includeHidden && hidden.size > 0) occ = occ.filter((o) => !o.categoryId || !hidden.has(o.categoryId))
     if (!showCompleted) occ = occ.filter((o) => !o.completed)
     return occ
-  }, [events, start.getTime(), end.getTime(), hidden, showCompleted, opts.includeHidden])
+  }, [events, startMs, endMs, hidden, showCompleted, includeHidden])
 }
