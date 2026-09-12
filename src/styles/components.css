@@ -301,7 +301,9 @@ input[type='time'].input {
   display: grid;
   place-items: center;
   justify-items: center;
-  z-index: 100;
+  /* Same layer as popovers: whichever mounted later wins, so a modal opened
+     from a popover (and a popover opened inside a modal) both stack correctly. */
+  z-index: 150;
   animation: fade-in var(--t-med) var(--ease) both;
   padding: 24px;
 }
@@ -346,7 +348,7 @@ input[type='time'].input {
 
 .popover {
   position: fixed;
-  z-index: 120;
+  z-index: 150;
   min-width: 200px;
   background: var(--bg-elevated);
   border-radius: var(--radius-md);

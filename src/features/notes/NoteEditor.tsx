@@ -35,6 +35,7 @@ import { UNCATEGORIZED_COLOR } from '../../lib/colors'
 import { MOD } from '../../hooks/useHotkeys'
 import type { Note } from '../../types/models'
 import { excerptFromDoc } from './notesModel'
+import { EventPicker } from '../links/EventPicker'
 
 /**
  * Extensions are a module-level constant: TipTap compares options by reference
@@ -61,6 +62,7 @@ export function NoteEditor({ note }: { note: Note }) {
   const [title, setTitle] = useState(note.title)
   const [menu, setMenu] = useState<Anchor | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [attaching, setAttaching] = useState(false)
   const saveTimer = useRef<number | null>(null)
   const persist = useRef<(editor: Editor) => void>(() => {})
   useEffect(() => {
@@ -156,9 +158,11 @@ export function NoteEditor({ note }: { note: Note }) {
       </div>
       <div className="note-footer-meta">
         <span>Edited {format(parseISO(note.updatedAt), 'MMM d, h:mm a')}</span>
+        <button className="btn ghost sm" style={{ height: 22, fontSize: 12 }} onClick={() => setAttaching(true)}>
+          <IconLink /> {linkedEvents.length > 0 ? 'Attached to' : 'Attach to event'}
+        </button>
         {linkedEvents.length > 0 && (
-          <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <IconLink width={12} height={12} />
+          <span style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
             {linkedEvents.map((e) => (
               <button
                 key={e.id}
@@ -187,6 +191,15 @@ export function NoteEditor({ note }: { note: Note }) {
         >
           <IconPin /> {note.pinned ? 'Unpin' : 'Pin to top'}
         </button>
+        <button
+          className="menu-item"
+          onClick={() => {
+            setMenu(null)
+            setAttaching(true)
+          }}
+        >
+          <IconLink /> Attach to event…
+        </button>
         <div className="menu-sep" />
         <button
           className="menu-item danger"
@@ -198,6 +211,7 @@ export function NoteEditor({ note }: { note: Note }) {
           <IconTrash /> Delete note
         </button>
       </Popover>
+      {attaching && <EventPicker item={{ type: 'note', id: note.id, title: note.title || 'Untitled note' }} onClose={() => setAttaching(false)} />}
       <ConfirmDialog
         open={confirmDelete}
         title="Delete this note?"

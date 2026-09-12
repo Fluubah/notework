@@ -27,6 +27,9 @@ import type { Annotation, AnnotationTool, PdfDocument } from '../../types/models
 import { PdfPage } from './PdfPage'
 import { loadPdf, type PdfDocumentProxy } from './pdfjs'
 import { HIGHLIGHT_COLORS, INK_COLORS, INK_WIDTHS, usePdfTools } from './pdfToolsStore'
+import { EventPicker } from '../links/EventPicker'
+import { IconLink } from '../../components/Icons'
+import { parseISO } from 'date-fns'
 
 const ZOOM_STEPS = [0.5, 0.67, 0.8, 1, 1.25, 1.5, 2, 2.5, 3]
 const PAGE_GAP = 16
@@ -54,6 +57,7 @@ export function PdfViewerPane({ pdf }: { pdf: PdfDocument }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [menu, setMenu] = useState<Anchor | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [attaching, setAttaching] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const undoStack = useRef<UndoEntry[]>([])
   const restoredScroll = useRef(false)
@@ -63,6 +67,8 @@ export function PdfViewerPane({ pdf }: { pdf: PdfDocument }) {
   const annotations = useMemo(() => allAnnotations.filter((a) => a.pdfId === pdf.id), [allAnnotations, pdf.id])
   const categories = useStore((s) => s.categories)
   const folders = useStore((s) => s.folders)
+  const events = useStore((s) => s.events)
+  const linkedEvents = useMemo(() => events.filter((e) => e.linkedPdfIds.includes(pdf.id)), [events, pdf.id])
   const { updatePdf, deletePdf, deleteAnnotation, addAnnotation } = useStore()
   const ui = useUi()
 
@@ -398,6 +404,34 @@ export function PdfViewerPane({ pdf }: { pdf: PdfDocument }) {
           )}
         </div>
         <div className="menu-sep" />
+        {linkedEvents.length > 0 && (
+          <>
+            <div className="menu-heading">Attached to</div>
+            {linkedEvents.map((e) => (
+              <button
+                key={e.id}
+                className="menu-item"
+                onClick={() => {
+                  setMenu(null)
+                  ui.setAnchorDate(parseISO(e.start))
+                  ui.setSection('calendar')
+                  ui.selectOccurrence(e.recurrence ? `${e.id}@${e.start}` : e.id)
+                }}
+              >
+                <span className="truncate">{e.title}</span>
+              </button>
+            ))}
+          </>
+        )}
+        <button
+          className="menu-item"
+          onClick={() => {
+            setMenu(null)
+            setAttaching(true)
+          }}
+        >
+          <IconLink /> Attach to event…
+        </button>
         <button
           className="menu-item"
           onClick={() => {
@@ -418,6 +452,7 @@ export function PdfViewerPane({ pdf }: { pdf: PdfDocument }) {
           <IconTrash /> Delete PDF
         </button>
       </Popover>
+      {attaching && <EventPicker item={{ type: 'pdf', id: pdf.id, title: pdf.name }} onClose={() => setAttaching(false)} />}
       <ConfirmDialog
         open={confirmDelete}
         title={`Delete “${pdf.name}”?`}

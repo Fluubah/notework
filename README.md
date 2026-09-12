@@ -27,7 +27,28 @@ npm run build
 - `src/lib/recurrence.ts` — expands recurring events into occurrences, with
   per-occurrence overrides and deletions.
 - `src/lib/dates.ts` — smart relative due labels ("Due tomorrow at 5pm").
-- `src/features/*` — calendar, notes, pdf, tasks, shell.
+- `src/lib/quickAdd.ts` — natural-language parsing (chrono-node) for ⌘K and
+  the task composer.
+- `src/lib/annotations.ts` — PDF annotation geometry. Everything is stored in
+  PDF page units, so rendering at any zoom is a multiply.
+- `src/features/calendar` — week/month views, editor, occurrence card.
+- `src/features/notes` — TipTap notes, class/folder tree.
+- `src/features/pdf` — pdf.js viewer with ink/highlight/text/sticky tools.
+- `src/features/tasks` — task list derived from assignments and exams.
+- `src/features/links` — attach notes/PDFs to events (both directions).
+
+## Features
+
+- **Calendar** — week and month views, drag to create/move/resize, recurring
+  classes with per-instance or whole-series edits, colour-coded classes.
+- **Quick add** — `⌘K`, then "Physics HW due Friday 11pm".
+- **Notes** — rich text with headings, lists, tasks, highlights; organised by
+  class and folder; search.
+- **PDFs** — upload slides/readings, annotate with pen, highlighter, text
+  boxes and sticky notes; annotations stay aligned across zoom and resize.
+- **Tasks** — assignments and exams grouped by urgency with checkboxes,
+  priority and live relative due dates; click a due date to see attachments.
+- **Linking** — attach notes or PDFs to any event from either side.
 
 ## Keyboard
 

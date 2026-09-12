@@ -25,6 +25,19 @@ const groups: { title: string; items: [string, string[]][] }[] = [
     ],
   },
   {
+    title: 'PDF annotation',
+    items: [
+      ['Select / Pen / Highlighter', ['V', 'P', 'H']],
+      ['Text / Sticky / Eraser', ['T', 'S', 'E']],
+      ['Undo', [MOD, 'Z']],
+      ['Zoom in / out / fit', [MOD, '+ / − / 0']],
+    ],
+  },
+  {
+    title: 'Tasks',
+    items: [['Focus add-task field', ['N']]],
+  },
+  {
     title: 'Editing',
     items: [
       ['Save', [MOD, '↵']],
