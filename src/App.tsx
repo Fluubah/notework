@@ -19,6 +19,7 @@ export function App() {
   const hydrate = useStore((s) => s.hydrate)
   const section = useUi((s) => s.section)
   const sidebarOpen = useUi((s) => s.sidebarOpen)
+  const setSidebarOpen = useUi((s) => s.setSidebarOpen)
   const ui = useUi()
   useApplyTheme()
 
@@ -42,8 +43,14 @@ export function App() {
   if (!hydrated) return null
 
   return (
-    <div className={`app ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
+    <div className={`app ${sidebarOpen ? 'sidebar-open-mobile' : 'sidebar-collapsed'}`}>
       <Sidebar />
+      {/* Scrim behind the mobile drawer; hidden by CSS on wider screens. */}
+      <div
+        className="sidebar-scrim"
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
       <main className="main">
         {section === 'calendar' && <CalendarPage />}
         {section === 'notes' && <NotesPage />}

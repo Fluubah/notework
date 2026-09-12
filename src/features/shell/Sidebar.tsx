@@ -7,6 +7,7 @@ import { useUi } from '../../data/uiStore'
 import { expandEvents } from '../../lib/recurrence'
 import { weekRange } from '../../lib/dates'
 import { MOD } from '../../hooks/useHotkeys'
+import { isMobileViewport } from '../../lib/media'
 
 export function Sidebar() {
   const ui = useUi()
@@ -14,6 +15,12 @@ export function Sidebar() {
   const settings = useStore((s) => s.settings)
   const updateSettings = useStore((s) => s.updateSettings)
   const isDark = document.documentElement.dataset.theme === 'dark'
+
+  // On a phone the sidebar is an overlay drawer, so navigating should dismiss it.
+  const go = (section: Parameters<typeof ui.setSection>[0]) => {
+    ui.setSection(section)
+    if (isMobileViewport()) ui.setSidebarOpen(false)
+  }
 
   return (
     <aside className="sidebar">
@@ -24,13 +31,13 @@ export function Sidebar() {
         Notework
       </div>
 
-      <button className={`nav-item ${ui.section === 'calendar' ? 'active' : ''}`} onClick={() => ui.setSection('calendar')}>
+      <button className={`nav-item ${ui.section === 'calendar' ? 'active' : ''}`} onClick={() => go('calendar')}>
         <IconCalendar /> Calendar <kbd>1</kbd>
       </button>
-      <button className={`nav-item ${ui.section === 'notes' ? 'active' : ''}`} onClick={() => ui.setSection('notes')}>
+      <button className={`nav-item ${ui.section === 'notes' ? 'active' : ''}`} onClick={() => go('notes')}>
         <IconNotes /> Notes <kbd>2</kbd>
       </button>
-      <button className={`nav-item ${ui.section === 'tasks' ? 'active' : ''}`} onClick={() => ui.setSection('tasks')}>
+      <button className={`nav-item ${ui.section === 'tasks' ? 'active' : ''}`} onClick={() => go('tasks')}>
         <IconTasks /> Tasks <kbd>3</kbd>
       </button>
 
@@ -157,6 +164,7 @@ function MiniCalendar() {
               onClick={() => {
                 ui.setAnchorDate(d)
                 if (ui.section !== 'calendar') ui.setSection('calendar')
+                if (isMobileViewport()) ui.setSidebarOpen(false)
               }}
             >
               {format(d, 'd')}
