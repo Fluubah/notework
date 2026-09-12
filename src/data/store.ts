@@ -281,5 +281,13 @@ if (typeof window !== 'undefined') {
 
 if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __store: typeof useStore }).__store = useStore
 
+/**
+ * The live persisted slice. Backups read this rather than the saved snapshot,
+ * which lags behind by up to one debounce interval.
+ */
+export function currentData(): AppData {
+  return pickData(useStore.getState())
+}
+
 // ---- Selectors
 export const selectCategoryMap = (s: AppState) => new Map(s.categories.map((c) => [c.id, c]))
