@@ -1,0 +1,87 @@
+:root {
+  color-scheme: light;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --bg: #f4f5f8;
+  --bg-elevated: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f0f1f5;
+  --surface-3: #e6e8ee;
+  --surface-hover: rgba(17, 19, 24, 0.045);
+  --surface-active: rgba(17, 19, 24, 0.08);
+  --border: rgba(17, 19, 24, 0.09);
+  --border-strong: rgba(17, 19, 24, 0.16);
+  --text: #15171c;
+  --text-2: #5b6170;
+  --text-3: #8b909c;
+  --text-on-accent: #ffffff;
+
+  --accent: #4f6df5;
+  --accent-hover: #3f5ce6;
+  --accent-soft: rgba(79, 109, 245, 0.12);
+  --accent-soft-2: rgba(79, 109, 245, 0.2);
+  --danger: #e5484d;
+  --danger-soft: rgba(229, 72, 77, 0.12);
+  --warning: #e0a12b;
+  --warning-soft: rgba(224, 161, 43, 0.14);
+  --success: #2fa66c;
+  --success-soft: rgba(47, 166, 108, 0.14);
+
+  --now-line: #ef4444;
+
+  --shadow-sm: 0 1px 2px rgba(17, 19, 24, 0.06), 0 0 0 1px rgba(17, 19, 24, 0.04);
+  --shadow-md: 0 4px 14px rgba(17, 19, 24, 0.1), 0 0 0 1px rgba(17, 19, 24, 0.05);
+  --shadow-lg: 0 18px 50px rgba(17, 19, 24, 0.18), 0 0 0 1px rgba(17, 19, 24, 0.06);
+  --shadow-pop: 0 10px 30px rgba(17, 19, 24, 0.14), 0 0 0 1px rgba(17, 19, 24, 0.06);
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 120ms;
+  --t-med: 200ms;
+  --t-slow: 320ms;
+
+  --sidebar-w: 248px;
+  --hour-h: 52px;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0e1014;
+  --bg-elevated: #15181e;
+  --surface: #15181e;
+  --surface-2: #1c2028;
+  --surface-3: #252a34;
+  --surface-hover: rgba(255, 255, 255, 0.055);
+  --surface-active: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.085);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #e9ebf0;
+  --text-2: #a3a9b6;
+  --text-3: #6f7583;
+  --text-on-accent: #ffffff;
+
+  --accent: #6b85ff;
+  --accent-hover: #7d94ff;
+  --accent-soft: rgba(107, 133, 255, 0.16);
+  --accent-soft-2: rgba(107, 133, 255, 0.28);
+  --danger: #ff6369;
+  --danger-soft: rgba(255, 99, 105, 0.16);
+  --warning: #f0b445;
+  --warning-soft: rgba(240, 180, 69, 0.16);
+  --success: #43c481;
+  --success-soft: rgba(67, 196, 129, 0.16);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
