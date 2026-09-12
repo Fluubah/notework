@@ -161,14 +161,16 @@ export interface InkAnnotation {
   createdAt: string
 }
 
+/** Marker-style highlighter: a wide, translucent stroke drawn over the page. */
 export interface HighlightAnnotation {
   id: ID
   pdfId: ID
   page: number
   type: 'highlight'
   color: string
-  /** Rectangles in PDF page space. */
-  rects: { x: number; y: number; w: number; h: number }[]
+  /** Stroke width in PDF points. */
+  width: number
+  strokes: PdfPoint[][]
   createdAt: string
 }
 
@@ -180,6 +182,7 @@ export interface TextAnnotation {
   color: string
   x: number
   y: number
+  /** Box width in PDF points. */
   w: number
   /** Font size in PDF points. */
   fontSize: number

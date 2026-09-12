@@ -8,7 +8,7 @@ import { NoteEditor } from './NoteEditor'
 import { NotesTree } from './NotesTree'
 import { PdfViewerPane } from '../pdf/PdfViewerPane'
 import { FolderDialog } from './FolderDialog'
-import { PdfUploadButton } from '../pdf/PdfUploadButton'
+import { importPdfFiles, PdfUploadButton } from '../pdf/PdfUploadButton'
 import { IconNotes } from '../../components/Icons'
 
 export function NotesPage() {
@@ -18,6 +18,7 @@ export function NotesPage() {
   const pdfs = useStore((s) => s.pdfs)
   const [query, setQuery] = useState('')
   const [folderDialog, setFolderDialog] = useState<{ categoryId: string | null } | null>(null)
+  const [dragging, setDragging] = useState(false)
 
   const selectedNote = useMemo(() => notes.find((n) => n.id === ui.selectedNoteId) ?? null, [notes, ui.selectedNoteId])
   const selectedPdf = useMemo(() => pdfs.find((p) => p.id === ui.selectedPdfId) ?? null, [pdfs, ui.selectedPdfId])
@@ -47,7 +48,26 @@ export function NotesPage() {
           </button>
         </Tooltip>
       </div>
-      <div className="notes-root">
+      <div
+        className="notes-root"
+        style={{ position: 'relative' }}
+        onDragOver={(e) => {
+          if (Array.from(e.dataTransfer.items).some((i) => i.type === 'application/pdf')) {
+            e.preventDefault()
+            setDragging(true)
+          }
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false)
+        }}
+        onDrop={async (e) => {
+          e.preventDefault()
+          setDragging(false)
+          const files = Array.from(e.dataTransfer.files).filter((f) => f.type === 'application/pdf')
+          if (files.length) await importPdfFiles(files)
+        }}
+      >
+        {dragging && <div className="pdf-drop">Drop PDFs to add them</div>}
         <div className="notes-list">
           <div className="notes-list-head">
             <div className="search">

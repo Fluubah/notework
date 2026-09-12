@@ -1,0 +1,415 @@
+.pdf-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface-2);
+}
+.pdf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex: none;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 43px;
+}
+.ink-options {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pdf-toolbar .sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+}
+.pdf-toolbar .spacer {
+  flex: 1;
+}
+.pdf-title {
+  border: none;
+  background: none;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 60px;
+  max-width: 180px;
+  flex: 0 1 auto;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+.pdf-title:hover {
+  background: var(--surface-hover);
+}
+.pdf-title:focus {
+  outline: none;
+  background: var(--surface-2);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.tool-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+  position: relative;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
+}
+.tool-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.tool-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tool-btn svg {
+  width: 17px;
+  height: 17px;
+}
+.tool-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.ink-colors {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.ink-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition:
+    transform var(--t-fast),
+    border-color var(--t-fast);
+  position: relative;
+  overflow: hidden;
+}
+.ink-color:hover {
+  transform: scale(1.1);
+}
+.ink-color.active {
+  border-color: var(--text);
+  transform: scale(1.1);
+}
+.ink-color input[type='color'] {
+  position: absolute;
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  opacity: 0;
+  cursor: pointer;
+}
+.ink-color.custom {
+  background: conic-gradient(#f55, #fb0, #6d6, #4dd, #59f, #b6f, #f55);
+}
+.width-picker {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.width-picker button {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+.width-picker button:hover {
+  background: var(--surface-hover);
+}
+.width-picker button.active {
+  background: var(--accent-soft);
+}
+.width-picker button span {
+  border-radius: 50%;
+  background: var(--text);
+  display: block;
+}
+.pdf-zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.pdf-zoom .val {
+  min-width: 44px;
+  text-align: center;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.pdf-zoom .val:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.pdf-pages {
+  font-size: 12px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pdf-pages input {
+  width: 40px;
+  height: 24px;
+  text-align: center;
+  padding: 0 4px;
+  font-size: 12px;
+}
+.pdf-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px;
+  position: relative;
+  scrollbar-gutter: stable;
+  touch-action: pan-x pan-y;
+}
+.pdf-scroll.tool-ink,
+.pdf-scroll.tool-highlight {
+  touch-action: none;
+}
+.pdf-page-wrap {
+  margin: 0 auto 16px;
+  position: relative;
+  background: #fff;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  contain: layout;
+  user-select: none;
+}
+[data-theme='dark'] .pdf-page-wrap {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.pdf-page-wrap.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.03), transparent);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.pdf-page-wrap canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+.pdf-page-wrap .pdf-canvas {
+  z-index: 1;
+}
+.pdf-page-wrap .ink-canvas {
+  z-index: 2;
+  pointer-events: none;
+}
+.pdf-page-wrap .dom-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+.pdf-page-wrap .input-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  touch-action: none;
+}
+.pdf-page-wrap .input-layer.passthrough {
+  pointer-events: none;
+}
+.pdf-page-wrap .input-layer.tool-ink,
+.pdf-page-wrap .input-layer.tool-highlight {
+  cursor: crosshair;
+}
+.pdf-page-wrap .input-layer.tool-eraser {
+  cursor: cell;
+}
+.pdf-page-wrap .input-layer.tool-text {
+  cursor: text;
+}
+.pdf-page-wrap .input-layer.tool-sticky {
+  cursor: copy;
+}
+.page-num {
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+/* Text box annotation */
+.ann-text {
+  position: absolute;
+  pointer-events: auto;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  min-height: 1.4em;
+}
+.ann-text:hover,
+.ann-text.selected {
+  border-color: var(--accent);
+}
+.ann-text.selected {
+  box-shadow: 0 0 0 2px var(--accent-soft-2);
+}
+.ann-text textarea {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  padding: 2px 4px;
+  line-height: 1.3;
+  font-family: var(--font-sans);
+  color: inherit;
+  outline: none;
+}
+.ann-text .handle {
+  position: absolute;
+  top: -14px;
+  left: -1px;
+  height: 14px;
+  padding: 0 6px;
+  border-radius: 4px 4px 0 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  line-height: 14px;
+  cursor: grab;
+  display: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.ann-text.selected .handle,
+.ann-text:hover .handle {
+  display: block;
+}
+.ann-text .resize {
+  position: absolute;
+  right: -4px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+.ann-text .del {
+  position: absolute;
+  top: -14px;
+  right: -1px;
+  height: 14px;
+  width: 16px;
+  border-radius: 4px 4px 0 0;
+  background: var(--danger);
+  color: #fff;
+  display: none;
+  place-items: center;
+}
+.ann-text.selected .del {
+  display: grid;
+}
+.ann-text .del svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Sticky note annotation */
+.ann-sticky {
+  position: absolute;
+  pointer-events: auto;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 6px 6px 6px 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform var(--t-fast);
+  transform-origin: bottom left;
+}
+.ann-sticky:hover {
+  transform: scale(1.12);
+}
+.ann-sticky svg {
+  width: 13px;
+  height: 13px;
+  color: rgba(0, 0, 0, 0.6);
+}
+.sticky-pop {
+  width: 260px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sticky-pop textarea {
+  min-height: 90px;
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  resize: vertical;
+  background: var(--surface);
+  color: var(--text);
+}
+.sticky-pop textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.sticky-pop .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pdf-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+.pdf-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg);
+  margin: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 16px;
+  pointer-events: none;
+}

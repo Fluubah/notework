@@ -16,6 +16,8 @@ import {
 import { fileStore, repository } from './index'
 
 type Patch<T> = Partial<Omit<T, 'id' | 'createdAt'>>
+/** Omit that distributes over unions (plain Omit collapses a union to its common keys). */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
 
 export interface AppState extends AppData {
   hydrated: boolean
@@ -56,7 +58,7 @@ export interface AppState extends AppData {
   deletePdf(id: string): Promise<void>
 
   // annotations
-  addAnnotation(a: Omit<Annotation, 'id' | 'createdAt'>): Annotation
+  addAnnotation(a: DistributiveOmit<Annotation, 'id' | 'createdAt'>): Annotation
   updateAnnotation(id: string, patch: Partial<Annotation>): void
   deleteAnnotation(id: string): void
   deleteAnnotations(ids: string[]): void
@@ -228,18 +230,27 @@ export const useStore = create<AppState>()((set, get) => ({
 }))
 
 // ---- Persistence: debounce writes so typing in a note doesn't hammer storage.
+const SAVE_DEBOUNCE_MS = 250
+/** Even under continuous edits (drawing, typing) persist at least this often. */
+const SAVE_MAX_WAIT_MS = 1000
 let saveTimer: ReturnType<typeof setTimeout> | null = null
-let lastSaved: AppData | null = null
+let firstPendingAt: number | null = null
+
+function persistNow() {
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = null
+  firstPendingAt = null
+  const data = pickData(useStore.getState())
+  void repository.save(data)
+}
 
 function scheduleSave(state: AppState) {
   if (!state.hydrated) return
+  const now = Date.now()
+  firstPendingAt ??= now
   if (saveTimer) clearTimeout(saveTimer)
-  saveTimer = setTimeout(() => {
-    saveTimer = null
-    const data = pickData(state)
-    lastSaved = data
-    void repository.save(data)
-  }, 250)
+  const wait = Math.max(0, Math.min(SAVE_DEBOUNCE_MS, firstPendingAt + SAVE_MAX_WAIT_MS - now))
+  saveTimer = setTimeout(persistNow, wait)
 }
 
 useStore.subscribe((state, prev) => {
@@ -253,12 +264,7 @@ useStore.subscribe((state, prev) => {
 
 /** Flush a pending save immediately (e.g. on page hide). */
 export function flushSave() {
-  if (saveTimer) {
-    clearTimeout(saveTimer)
-    saveTimer = null
-    const data = pickData(useStore.getState())
-    if (data !== lastSaved) void repository.save(data)
-  }
+  if (saveTimer) persistNow()
 }
 
 if (typeof window !== 'undefined') {
@@ -267,6 +273,8 @@ if (typeof window !== 'undefined') {
     if (document.visibilityState === 'hidden') flushSave()
   })
 }
+
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __store: typeof useStore }).__store = useStore
 
 // ---- Selectors
 export const selectCategoryMap = (s: AppState) => new Map(s.categories.map((c) => [c.id, c]))

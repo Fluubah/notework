@@ -16,13 +16,15 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, children, footer, wide, dismissible = true, className }: ModalProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
 
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
       }
     }
     document.addEventListener('keydown', onKey, true)
@@ -36,7 +38,7 @@ export function Modal({ open, onClose, title, children, footer, wide, dismissibl
       document.removeEventListener('keydown', onKey, true)
       prev?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
   return createPortal(

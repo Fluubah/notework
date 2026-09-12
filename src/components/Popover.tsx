@@ -68,21 +68,31 @@ export function Popover({ anchor, onClose, children, placement = 'auto', width, 
     x = Math.max(margin, Math.min(x, vw - w - margin))
     y = Math.max(margin, Math.min(y, vh - h - margin))
     setPos({ left: x, top: y, width, visibility: 'visible' })
+    // Focus requests made while the popover was still hidden don't take; retry now.
+    const id = requestAnimationFrame(() => el.querySelector<HTMLElement>('[data-autofocus]')?.focus())
+    return () => cancelAnimationFrame(id)
   }, [anchor, placement, width])
 
+  // Latest callbacks via refs so the listeners are registered once per open,
+  // not re-armed (with a frame of deafness) on every re-render.
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+  const closeOnOutsideRef = useRef(closeOnOutside)
+  closeOnOutsideRef.current = closeOnOutside
+  const isOpen = !!anchor
   useLayoutEffect(() => {
-    if (!anchor) return
+    if (!isOpen) return
     const onDown = (e: MouseEvent) => {
-      if (!closeOnOutside) return
+      if (!closeOnOutsideRef.current) return
       const t = e.target as HTMLElement
       // Clicks inside a modal opened from this popover shouldn't dismiss it.
       if (t.closest('.overlay, .modal')) return
-      if (ref.current && !ref.current.contains(t)) onClose()
+      if (ref.current && !ref.current.contains(t)) onCloseRef.current()
     }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
       }
     }
     // Defer so the click that opened the popover doesn't close it.
@@ -95,7 +105,7 @@ export function Popover({ anchor, onClose, children, placement = 'auto', width, 
       document.removeEventListener('mousedown', onDown)
       document.removeEventListener('keydown', onKey, true)
     }
-  }, [anchor, onClose, closeOnOutside])
+  }, [isOpen])
 
   if (!anchor) return null
   return createPortal(
