@@ -3,18 +3,29 @@ import { MOBILE_QUERY } from '../lib/media'
 
 const PREFS_KEY = 'notework:ui:v1'
 
+type Listener = (e: { matches: boolean }) => void
+let listeners: Listener[] = []
+
 /** Stub matchMedia so the store sees a phone-sized (or desktop) viewport. */
 function setViewport(mobile: boolean) {
+  listeners = []
   vi.stubGlobal('matchMedia', (query: string) => ({
     matches: mobile && query === MOBILE_QUERY,
     media: query,
-    addEventListener() {},
+    addEventListener(_: string, fn: Listener) {
+      listeners.push(fn)
+    },
     removeEventListener() {},
     addListener() {},
     removeListener() {},
     onchange: null,
     dispatchEvent: () => false,
   }))
+}
+
+/** Fire the breakpoint change the store subscribed to. */
+function crossBreakpoint(nowMobile: boolean) {
+  for (const fn of listeners) fn({ matches: nowMobile })
 }
 
 async function freshStore() {
@@ -58,6 +69,26 @@ describe('uiStore sidebar', () => {
     const useUi = await freshStore()
     useUi.getState().toggleSidebar()
     expect(JSON.parse(localStorage.getItem(PREFS_KEY)!).sidebarOpen).toBe(true)
+  })
+
+  it('closes the drawer when a desktop window is resized down to phone width', async () => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ sidebarOpen: true }))
+    setViewport(false)
+    const useUi = await freshStore()
+    expect(useUi.getState().sidebarOpen).toBe(true)
+
+    crossBreakpoint(true)
+    expect(useUi.getState().sidebarOpen).toBe(false)
+  })
+
+  it('restores the split layout when the window grows back', async () => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ sidebarOpen: true }))
+    setViewport(true)
+    const useUi = await freshStore()
+    expect(useUi.getState().sidebarOpen).toBe(false)
+
+    crossBreakpoint(false)
+    expect(useUi.getState().sidebarOpen).toBe(true)
   })
 
   it('persists the preference on desktop', async () => {

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { isMobileViewport } from '../lib/media'
+import { isMobileViewport, MOBILE_QUERY } from '../lib/media'
 import type { Occurrence, Priority, RecurrenceRule } from '../types/models'
 
 export type Section = 'calendar' | 'notes' | 'tasks'
@@ -131,5 +131,14 @@ if (typeof localStorage !== 'undefined') {
         /* storage may be unavailable; prefs are optional */
       }
     }
+  })
+}
+
+if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+  // Crossing the breakpoint swaps the sidebar between a split column and an
+  // overlay drawer. Close the drawer on the way in so it never covers the app
+  // after a resize or rotation, and restore the split preference on the way out.
+  window.matchMedia(MOBILE_QUERY).addEventListener('change', (e) => {
+    useUi.getState().setSidebarOpen(e.matches ? false : desktopSidebarOpen)
   })
 }

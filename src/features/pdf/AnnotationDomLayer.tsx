@@ -162,13 +162,16 @@ function Sticky({ a, scale, selected, onSelect, interactive }: { a: StickyAnnota
     setText(a.text)
   }
 
-  // The note marker is already committed to the DOM by the time it can be
-  // selected, so measure it as the selection changes instead of opening the
-  // popover unanchored and repositioning it from an effect.
-  const [anchorState, setAnchorState] = useState<{ open: boolean; anchor: Anchor | null }>({ open: false, anchor: null })
-  if (anchorState.open !== selected) {
-    const r = selected ? markerEl?.getBoundingClientRect() : undefined
-    setAnchorState({ open: selected, anchor: r ? { x: r.right, y: r.top, rect: r } : null })
+  // Measure the marker as the selection changes, instead of opening the
+  // popover unanchored and repositioning it from an effect. Keyed on the
+  // element itself rather than on `selected`, because a note that is selected
+  // the moment it is created renders before its callback ref has run: the
+  // element arriving is what triggers the measurement in that case.
+  const [anchorState, setAnchorState] = useState<{ target: HTMLDivElement | null; anchor: Anchor | null }>({ target: null, anchor: null })
+  const anchorTarget = selected ? markerEl : null
+  if (anchorState.target !== anchorTarget) {
+    const r = anchorTarget?.getBoundingClientRect()
+    setAnchorState({ target: anchorTarget, anchor: r ? { x: r.right, y: r.top, rect: r } : null })
   }
   const anchor = anchorState.anchor
 
