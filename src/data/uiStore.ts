@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Occurrence } from '../types/models'
+import type { Occurrence, Priority, RecurrenceRule } from '../types/models'
 
 export type Section = 'calendar' | 'notes' | 'tasks'
 export type CalendarView = 'week' | 'month'
@@ -12,6 +12,9 @@ export interface EventDraft {
   title?: string
   kind?: 'class' | 'assignment' | 'exam' | 'event'
   categoryId?: string | null
+  recurrence?: RecurrenceRule
+  priority?: Priority
+  location?: string
 }
 
 export interface EditorState {

@@ -77,13 +77,13 @@ function initialForm(state: EditorState, lastCategoryId: string | null): Form {
     startTime: fmtTime(d.start),
     endDate: fmtDate(endForForm),
     endTime: fmtTime(endForForm),
-    location: '',
+    location: d.location ?? '',
     description: '',
-    repeat: d.kind === 'class' ? 'weekly' : 'none',
-    interval: 1,
-    byWeekday: [d.start.getDay() as Weekday],
-    until: '',
-    priority: '',
+    repeat: d.recurrence?.freq ?? (d.kind === 'class' ? 'weekly' : 'none'),
+    interval: d.recurrence?.interval ?? 1,
+    byWeekday: d.recurrence?.byWeekday ?? [d.start.getDay() as Weekday],
+    until: d.recurrence?.until ? fmtDate(parseISO(d.recurrence.until)) : '',
+    priority: d.priority ?? '',
   }
 }
 

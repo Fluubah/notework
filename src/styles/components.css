@@ -300,6 +300,7 @@ input[type='time'].input {
   -webkit-backdrop-filter: blur(2px);
   display: grid;
   place-items: center;
+  justify-items: center;
   z-index: 100;
   animation: fade-in var(--t-med) var(--ease) both;
   padding: 24px;
