@@ -5,6 +5,8 @@ import { fileStore } from '../../data'
 import { backupFilename, createBackup, parseBackup, restoreBackup } from '../../data/backup'
 import { currentData, useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
+import { useSync } from '../../data/sync/syncStore'
+import { SyncSettings } from './SyncSettings'
 
 export function SettingsDialog() {
   const open = useUi((s) => s.settingsOpen)
@@ -15,6 +17,7 @@ export function SettingsDialog() {
   const importData = useStore((s) => s.importData)
   const [confirmReset, setConfirmReset] = useState(false)
   const [busy, setBusy] = useState<'export' | 'import' | null>(null)
+  const syncedAccount = useSync((s) => s.account)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const exportJson = async () => {
@@ -101,10 +104,15 @@ export function SettingsDialog() {
           </div>
           <button role="switch" aria-checked={settings.showCompleted} className="switch" onClick={() => updateSettings({ showCompleted: !settings.showCompleted })} />
         </div>
+        <SyncSettings />
         <div className="settings-row">
           <div>
             <div className="label">Your data</div>
-            <div className="desc">Stored in this browser only. An export is your only backup — it includes your PDFs.</div>
+            <div className="desc">
+              {syncedAccount
+                ? 'Synced to your account. An export is a portable backup — it includes your PDFs.'
+                : 'Stored in this browser only. An export is your only backup — it includes your PDFs.'}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="btn sm" onClick={exportJson} disabled={busy !== null}>
@@ -133,7 +141,11 @@ export function SettingsDialog() {
       <ConfirmDialog
         open={confirmReset}
         title="Erase everything?"
-        message="This removes all classes, events, notes and PDFs from this browser. Export first if you want a backup."
+        message={
+          syncedAccount
+            ? 'This removes all classes, events, notes and PDFs from this browser and from your synced account, on every device. Export first if you want a backup.'
+            : 'This removes all classes, events, notes and PDFs from this browser. Export first if you want a backup.'
+        }
         confirmLabel="Erase all data"
         danger
         onCancel={() => setConfirmReset(false)}
