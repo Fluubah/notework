@@ -121,6 +121,8 @@ Worth knowing:
   ids are stable, so refreshing updates entries instead of duplicating them.
 - Completed assignments stay in the calendar as `CANCELLED` (greyed out) and
   lose their alert.
+- Alerts are per kind, defaulting to assignments and exams. A weekly class you
+  already know about doesn't need a notification; a deadline does.
 
 ## Features
 

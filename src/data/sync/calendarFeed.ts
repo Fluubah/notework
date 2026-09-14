@@ -44,6 +44,7 @@ export async function publishFeed(userId: string, token: string): Promise<{ byte
     name: 'Notework',
     categories: data.categories,
     alarmMinutesBefore: data.settings.calendarAlarmMinutes ?? null,
+    alarmKinds: data.settings.calendarAlarmKinds ?? null,
   })
   const blob = new Blob([ics], { type: 'text/calendar; charset=utf-8' })
   const { error } = await (await getSupabase())
@@ -80,7 +81,12 @@ export function watchAndPublish(userId: string, onResult?: (err: Error | null) =
   stopPublishing()
   unsubscribe = useStore.subscribe((state, prev) => {
     if (!state.hydrated) return
-    const relevant = state.events !== prev.events || state.categories !== prev.categories
+    // Settings that change what the file contains count too: without this,
+    // changing the alert timing quietly had no effect until the next edit.
+    const feedSettingsChanged =
+      state.settings.calendarAlarmMinutes !== prev.settings.calendarAlarmMinutes ||
+      state.settings.calendarAlarmKinds !== prev.settings.calendarAlarmKinds
+    const relevant = state.events !== prev.events || state.categories !== prev.categories || feedSettingsChanged
     if (!relevant) return
     const { calendarFeedEnabled, calendarToken } = state.settings
     if (!calendarFeedEnabled || !calendarToken) return
