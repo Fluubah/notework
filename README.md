@@ -56,11 +56,13 @@ Turning it on takes about five minutes:
    [`src/data/sync/schema.sql`](src/data/sync/schema.sql). It creates the
    snapshot table, the private PDF bucket, and the row-level security policies
    that keep each account's data to itself.
-3. Under **Project Settings → API**, copy the **Project URL** and the **anon /
-   publishable** key.
+3. Under **Project Settings → API**, copy the **Project URL** and the
+   **publishable** key (`sb_publishable_…`). Never use the **secret** key in
+   this app — it bypasses row-level security and would be shipped to the
+   browser.
 4. For local development, `cp .env.example .env.local` and paste them in. For
    the deployed site, add them as the repository secrets
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` — the Pages workflow
+   `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` — the Pages workflow
    passes them through.
 5. Optionally turn off **Authentication → Sign In / Providers → Confirm
    email** while testing, so a new account can sign in immediately.
