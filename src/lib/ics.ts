@@ -1,5 +1,5 @@
 import { expandEvents } from './recurrence'
-import type { CalendarEvent, Category, Occurrence } from '../types/models'
+import type { CalendarEvent, Category, EventKind, Occurrence } from '../types/models'
 
 /**
  * iCalendar (RFC 5545) generation.
@@ -24,6 +24,11 @@ export interface IcsOptions {
   name?: string
   /** Minutes before the start to fire an alarm. Omit for no alarms. */
   alarmMinutesBefore?: number | null
+  /**
+   * Which kinds get that alarm. Omit for all of them. A weekly class you
+   * already know about doesn't need a notification; a deadline does.
+   */
+  alarmKinds?: EventKind[] | null
   /** Categories, so an event can carry its class name. */
   categories?: Category[]
   /** Injectable for tests. */
@@ -138,7 +143,8 @@ function vevent(occ: Occurrence, opts: IcsOptions, dtstamp: string, categoryName
   if (occ.completed) lines.push('STATUS:CANCELLED')
 
   const alarm = opts.alarmMinutesBefore
-  if (alarm != null && alarm > 0 && !occ.completed) {
+  const kindWantsAlarm = !opts.alarmKinds || opts.alarmKinds.includes(occ.kind)
+  if (alarm != null && alarm > 0 && kindWantsAlarm && !occ.completed) {
     lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${escapeText(occ.title)}`, `TRIGGER:-PT${Math.round(alarm)}M`, 'END:VALARM')
   }
 

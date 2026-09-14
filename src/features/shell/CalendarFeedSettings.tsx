@@ -3,6 +3,10 @@ import { toast } from '../../components/toastStore'
 import { ensureCalendarToken, feedUrl, publishFeed, unpublishFeed } from '../../data/sync/calendarFeed'
 import { useSync } from '../../data/sync/syncStore'
 import { useStore } from '../../data/store'
+import { KIND_LABEL } from '../calendar/eventOps'
+import type { EventKind } from '../../types/models'
+
+const ALARM_KINDS: EventKind[] = ['assignment', 'exam', 'event', 'class']
 
 /**
  * Publishes a .ics subscription URL. Only offered when signed in, because the
@@ -20,6 +24,7 @@ export function CalendarFeedSettings() {
 
   const enabled = Boolean(settings.calendarFeedEnabled && settings.calendarToken)
   const url = account && settings.calendarToken ? feedUrl(account.id, settings.calendarToken) : null
+  const alarmKinds = settings.calendarAlarmKinds ?? ['assignment', 'exam']
 
   const toggle = async () => {
     if (!account) return
@@ -90,6 +95,28 @@ export function CalendarFeedSettings() {
                   <option value="1440">1 day before</option>
                 </select>
               </div>
+
+              {(settings.calendarAlarmMinutes ?? 0) > 0 && (
+                <div className="alarm-kinds" role="group" aria-label="Alert me about">
+                  <span className="alarm-kinds-title">Alert me about</span>
+                  <div className="alarm-kinds-row">
+                    {ALARM_KINDS.map((kind) => {
+                      const on = alarmKinds.includes(kind)
+                      return (
+                        <button
+                          key={kind}
+                          type="button"
+                          className={`kind-chip ${on ? 'active' : ''}`}
+                          aria-pressed={on}
+                          onClick={() => updateSettings({ calendarAlarmKinds: on ? alarmKinds.filter((k) => k !== kind) : [...alarmKinds, kind] })}
+                        >
+                          {KIND_LABEL[kind]}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
               <p className="sync-warning" style={{ marginTop: 2 }}>
                 Anyone with this link can read your calendar — it&apos;s a secret address, not a password. On iPhone:
                 Calendar → Calendars → Add Calendar → Add Subscription Calendar, then paste it.

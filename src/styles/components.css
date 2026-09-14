@@ -803,3 +803,53 @@ input[type='time'].input {
     max-width: none;
   }
 }
+
+/* ---------- Calendar feed: which kinds get an alert ---------- */
+.alarm-kinds {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+.alarm-kinds-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+}
+.alarm-kinds-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.kind-chip {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  background: var(--surface);
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+.kind-chip:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.kind-chip.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+@media (max-width: 760px) {
+  .alarm-kinds,
+  .alarm-kinds-row {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+}

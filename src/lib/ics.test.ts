@@ -234,6 +234,35 @@ describe('categories and alarms', () => {
   it('adds none by default', () => {
     expect(buildIcs(occurrencesOf(event()), { now: NOW })).not.toContain('VALARM')
   })
+  it('limits alarms to the chosen kinds', () => {
+    const events = [event({ id: 'a', kind: 'class', title: 'Lecture' }), event({ id: 'b', kind: 'exam', title: 'Midterm' }), event({ id: 'c', kind: 'assignment', title: 'Essay' })]
+    const occs = expandEvents(events, new Date(2026, 8, 1), new Date(2026, 9, 1))
+    const ics = buildIcs(occs, { alarmMinutesBefore: 60, alarmKinds: ['assignment', 'exam'], now: NOW })
+
+    // One alarm each for the exam and the essay; none for the lecture.
+    expect((ics.match(/BEGIN:VALARM/g) ?? []).length).toBe(2)
+    const alarmed = logicalLines(ics)
+      .join('\n')
+      .split('BEGIN:VEVENT')
+      .filter((block) => block.includes('BEGIN:VALARM'))
+    expect(alarmed.some((b) => b.includes('Midterm'))).toBe(true)
+    expect(alarmed.some((b) => b.includes('Essay'))).toBe(true)
+    expect(alarmed.some((b) => b.includes('Lecture'))).toBe(false)
+  })
+  it('alarms every kind when none is specified', () => {
+    const events = [event({ id: 'a', kind: 'class' }), event({ id: 'b', kind: 'exam' })]
+    const occs = expandEvents(events, new Date(2026, 8, 1), new Date(2026, 9, 1))
+    expect((buildIcs(occs, { alarmMinutesBefore: 60, now: NOW }).match(/BEGIN:VALARM/g) ?? []).length).toBe(2)
+  })
+  it('adds no alarms when the list is empty', () => {
+    const ics = buildIcs(occurrencesOf(event({ kind: 'exam' })), { alarmMinutesBefore: 60, alarmKinds: [], now: NOW })
+    expect(ics).not.toContain('VALARM')
+  })
+  it('still shows the event itself when its kind is not alarmed', () => {
+    const ics = buildIcs(occurrencesOf(event({ kind: 'class' })), { alarmMinutesBefore: 60, alarmKinds: ['exam'], now: NOW })
+    expect(lineFor(ics, 'SUMMARY:').length).toBe(1)
+    expect(ics).not.toContain('VALARM')
+  })
   it('does not nag about something already done', () => {
     const done = occurrencesOf(event({ kind: 'assignment', completed: true }))
     const ics = buildIcs(done, { alarmMinutesBefore: 60, now: NOW })

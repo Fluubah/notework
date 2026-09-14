@@ -223,6 +223,11 @@ export interface Settings {
   calendarFeedEnabled?: boolean
   /** Minutes before an event to put an alarm in the feed. 0 or null for none. */
   calendarAlarmMinutes?: number | null
+  /**
+   * Which kinds of event get an alarm in the feed. Recurring classes are
+   * usually already known, so the default is the deadline-shaped ones.
+   */
+  calendarAlarmKinds?: EventKind[]
 }
 
 /** Everything the app persists. */
@@ -246,6 +251,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showCompleted: true,
   calendarFeedEnabled: false,
   calendarAlarmMinutes: 60,
+  calendarAlarmKinds: ['assignment', 'exam'],
 }
 
 export function emptyAppData(): AppData {
