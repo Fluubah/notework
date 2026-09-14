@@ -79,6 +79,15 @@ insert into storage.buckets (id, name, public)
 values ('notework-calendars', 'notework-calendars', true)
 on conflict (id) do update set public = true;
 
+-- The app republishes with upsert, so it overwrites the previous file rather
+-- than piling up copies. An upsert has to be able to SEE the existing row, so
+-- the owner needs SELECT here even though the bucket is public -- public only
+-- covers the anonymous read endpoint that calendar clients use.
+drop policy if exists "own calendar readable" on storage.objects;
+create policy "own calendar readable"
+  on storage.objects for select
+  using (bucket_id = 'notework-calendars' and (storage.foldername(name))[1] = auth.uid()::text);
+
 drop policy if exists "own calendar insertable" on storage.objects;
 create policy "own calendar insertable"
   on storage.objects for insert

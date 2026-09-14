@@ -100,6 +100,11 @@ To enable it: run the calendar section at the bottom of
 [`src/data/sync/schema.sql`](src/data/sync/schema.sql) (safe to re-run the
 whole file), then Settings → **Subscribe in your calendar app**.
 
+All four calendar policies are needed, including the SELECT one: the feed is
+republished with an upsert, which has to read the existing row first. A
+missing SELECT policy shows up as "new row violates row-level security
+policy" on publish, which points at the wrong statement.
+
 On iPhone: Calendar → Calendars → Add Calendar → **Add Subscription
 Calendar**, paste the link.
 
