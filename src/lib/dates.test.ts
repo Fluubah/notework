@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { formatCompactTime, formatRangeTitle, relativeDue, toISO } from './dates'
 
 const now = new Date(2026, 8, 12, 10, 0) // Sat Sep 12 2026 10:00
@@ -40,6 +40,19 @@ describe('relativeDue', () => {
     expect(relativeDue(due, false, at(2026, 9, 14, 8)).short).toBe('today at 12pm')
     expect(relativeDue(due, false, at(2026, 9, 14, 13)).tone).toBe('past')
   })
+  it('ignores the real clock and uses the `now` it is given', () => {
+    // These labels are rendered from a `now` the caller controls, and the
+    // suite must not pass or fail depending on the day it is run.
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2027, 5, 1, 9, 0)) // nowhere near the fixture
+    try {
+      expect(relativeDue(at(2026, 9, 12, 17), false, now).label).toBe('Due today at 5pm')
+      expect(relativeDue(at(2026, 9, 13, 17), false, now).label).toBe('Due tomorrow at 5pm')
+      expect(relativeDue(at(2026, 9, 15, 23), false, now).label).toBe('Due in 3 days at 11pm')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
   it('supports a different verb', () => {
     expect(relativeDue(at(2026, 9, 13, 9), false, now, 'Exam').label).toBe('Exam tomorrow at 9am')
     expect(relativeDue(at(2026, 9, 13, 9), false, now, '').label).toBe('tomorrow at 9am')
@@ -67,4 +80,8 @@ describe('toISO', () => {
     const d = at(2026, 9, 12, 17, 30)
     expect(new Date(toISO(d)).getTime()).toBe(d.getTime())
   })
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
