@@ -213,6 +213,16 @@ export interface Settings {
   /** Hour the week view scrolls to on open. */
   dayStartHour: number
   showCompleted: boolean
+  /**
+   * Secret path segment for the published calendar feed. Lives in settings so
+   * every signed-in device publishes to, and shows, the same URL. Absent until
+   * the feed is switched on for the first time.
+   */
+  calendarToken?: string
+  /** Whether the .ics feed is published at all. */
+  calendarFeedEnabled?: boolean
+  /** Minutes before an event to put an alarm in the feed. 0 or null for none. */
+  calendarAlarmMinutes?: number | null
 }
 
 /** Everything the app persists. */
@@ -234,6 +244,8 @@ export const DEFAULT_SETTINGS: Settings = {
   weekStartsOn: 1,
   dayStartHour: 8,
   showCompleted: true,
+  calendarFeedEnabled: false,
+  calendarAlarmMinutes: 60,
 }
 
 export function emptyAppData(): AppData {

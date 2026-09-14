@@ -62,3 +62,35 @@ drop policy if exists "own files deletable" on storage.objects;
 create policy "own files deletable"
   on storage.objects for delete
   using (bucket_id = 'notework-files' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- --------------------------------------------------- published calendar feed
+-- Optional. Only needed for Settings -> "Subscribe in your calendar app".
+--
+-- This bucket is PUBLIC on purpose: iOS and Google Calendar fetch a
+-- subscription URL without sending any credentials, so the file has to be
+-- readable by anyone who has the link. The link contains a 24-character random
+-- token, which is the same protection Google and Apple use for their own
+-- "secret address" calendar URLs. Anyone you give the URL to can read your
+-- calendar, so treat it like a password.
+--
+-- Writes are still locked down: only the signed-in owner can publish into
+-- their own folder.
+insert into storage.buckets (id, name, public)
+values ('notework-calendars', 'notework-calendars', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "own calendar insertable" on storage.objects;
+create policy "own calendar insertable"
+  on storage.objects for insert
+  with check (bucket_id = 'notework-calendars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "own calendar updatable" on storage.objects;
+create policy "own calendar updatable"
+  on storage.objects for update
+  using (bucket_id = 'notework-calendars' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'notework-calendars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "own calendar deletable" on storage.objects;
+create policy "own calendar deletable"
+  on storage.objects for delete
+  using (bucket_id = 'notework-calendars' and (storage.foldername(name))[1] = auth.uid()::text);

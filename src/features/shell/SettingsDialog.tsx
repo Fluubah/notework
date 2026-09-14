@@ -7,6 +7,7 @@ import { currentData, useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
 import { useSync } from '../../data/sync/syncStore'
 import { SyncSettings } from './SyncSettings'
+import { CalendarFeedSettings } from './CalendarFeedSettings'
 
 export function SettingsDialog() {
   const open = useUi((s) => s.settingsOpen)
@@ -105,6 +106,7 @@ export function SettingsDialog() {
           <button role="switch" aria-checked={settings.showCompleted} className="switch" onClick={() => updateSettings({ showCompleted: !settings.showCompleted })} />
         </div>
         <SyncSettings />
+        <CalendarFeedSettings />
         <div className="settings-row">
           <div>
             <div className="label">Your data</div>
