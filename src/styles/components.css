@@ -783,3 +783,23 @@ input[type='time'].input {
     text-align: left;
   }
 }
+
+/* ---------- Calendar feed ---------- */
+.feed-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  max-width: 280px;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+@media (max-width: 760px) {
+  .feed-url {
+    max-width: none;
+  }
+}

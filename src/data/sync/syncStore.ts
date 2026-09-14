@@ -6,6 +6,7 @@ import { getSupabase, isSyncConfigured } from './supabaseClient'
 import { SupabaseRemoteFileStore, SupabaseSnapshotStore } from './supabaseRemote'
 import { LocalSyncMeta, SyncedRepository } from './syncedRepository'
 import { SyncedFileStore } from './syncedFileStore'
+import { stopPublishing, watchAndPublish } from './calendarFeed'
 import type { SyncStatus } from './types'
 
 const DEVICE_KEY = 'notework:device:v1'
@@ -154,6 +155,7 @@ function applySession(user: { id: string; email?: string } | null, set: Setter, 
   if (!user && !current) return
 
   if (!user) {
+    stopPublishing()
     synced = null
     syncedFiles = null
     setBackends({ repository: null, fileStore: null })
@@ -176,6 +178,11 @@ function applySession(user: { id: string; email?: string } | null, set: Setter, 
     onPending: (pendingUploads) => set((s) => ({ status: { ...s.status, pendingUploads } })),
   })
   setBackends({ repository: synced, fileStore: syncedFiles })
+  watchAndPublish(user.id, (err) => {
+    // A failed republish leaves the previous feed in place, which is stale but
+    // not broken; surface it in the sync status rather than as an alert.
+    if (err) set((s) => ({ status: { ...s.status, message: `Calendar feed: ${err.message}` } }))
+  })
   set({ account: { id: user.id, email: user.email ?? null } })
   // Re-read through the synced repository, which reconciles with the server.
   void useStore

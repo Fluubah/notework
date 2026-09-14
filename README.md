@@ -85,6 +85,38 @@ How it behaves:
   of the two copies wins. Export a backup first if that matters.
 - **Reset** erases the account too, on every device, not just this browser.
 
+## Calendar subscription (optional, needs sync)
+
+With sync on, Settings can publish your classes, assignments and exams as an
+`.ics` feed your phone subscribes to — so due dates show up in the native
+Calendar app, on the lock screen, and in the Calendar widget, with alerts.
+
+The file is generated in the browser and uploaded to a public storage bucket
+under an unguessable token, rather than served by a function. That works
+because the data only ever changes while the app is open: there is no
+server-side write a browser-generated file could miss.
+
+To enable it: run the calendar section at the bottom of
+[`src/data/sync/schema.sql`](src/data/sync/schema.sql) (safe to re-run the
+whole file), then Settings → **Subscribe in your calendar app**.
+
+On iPhone: Calendar → Calendars → Add Calendar → **Add Subscription
+Calendar**, paste the link.
+
+Worth knowing:
+
+- **The URL is a secret address, not a password.** Anyone holding it can read
+  your calendar — the same trade Google and Apple make for their own "secret
+  address" calendar links. Turning the feed off deletes the published file.
+- **Not instant.** iOS refreshes subscribed calendars on its own schedule,
+  typically hourly. Fine for "essay due Friday"; useless for reminders in the
+  next few minutes.
+- Recurring classes are written as one entry per occurrence rather than as an
+  `RRULE`, so per-occurrence edits and deletions carry across exactly. Event
+  ids are stable, so refreshing updates entries instead of duplicating them.
+- Completed assignments stay in the calendar as `CANCELLED` (greyed out) and
+  lose their alert.
+
 ## Features
 
 - **Calendar** — week and month views, drag to create/move/resize, recurring
