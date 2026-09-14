@@ -2,7 +2,8 @@ import { formatDistanceToNowStrict, parseISO } from 'date-fns'
 import { useMemo, useState } from 'react'
 import { IconChevronDown, IconEdit, IconFolder, IconFolderPlus, IconMore, IconPdf, IconPin, IconPlus, IconTrash } from '../../components/Icons'
 import { ConfirmDialog } from '../../components/Modal'
-import { Popover, anchorFromEvent, type Anchor } from '../../components/Popover'
+import { Popover, type Anchor } from '../../components/Popover'
+import { anchorFromEvent } from '../../components/popoverAnchor'
 import { useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
 import { UNCATEGORIZED_COLOR } from '../../lib/colors'
@@ -51,7 +52,8 @@ export function NotesTree({ query, onNewFolder }: Props) {
   const toggle = (key: string) =>
     setCollapsed((s) => {
       const n = new Set(s)
-      n.has(key) ? n.delete(key) : n.add(key)
+      if (n.has(key)) n.delete(key)
+      else n.add(key)
       return n
     })
 

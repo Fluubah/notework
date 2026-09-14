@@ -29,6 +29,12 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build -- --base=/${{ github.event.repository.name }}/
+        env:
+          # Optional. Leave these repository secrets unset and the deployed
+          # app is local-only: the sync UI is hidden and supabase-js is not
+          # even bundled. See README.md.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

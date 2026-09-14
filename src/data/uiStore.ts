@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { isMobileViewport, MOBILE_QUERY } from '../lib/media'
 import type { Occurrence, Priority, RecurrenceRule } from '../types/models'
 
 export type Section = 'calendar' | 'notes' | 'tasks'
@@ -32,6 +33,7 @@ export interface UiState {
   setAnchorDate(d: Date): void
   sidebarOpen: boolean
   toggleSidebar(): void
+  setSidebarOpen(v: boolean): void
   editor: EditorState | null
   openEditor(e: EditorState): void
   closeEditor(): void
@@ -73,6 +75,10 @@ function loadPrefs(): UiPrefs {
   }
 }
 const prefs = typeof localStorage !== 'undefined' ? loadPrefs() : {}
+const desktopSidebarOpen = prefs.sidebarOpen ?? true
+/** On a phone the sidebar is an overlay drawer, so it always starts closed —
+ *  the persisted preference only describes the desktop split layout. */
+const initialSidebarOpen = isMobileViewport() ? false : desktopSidebarOpen
 
 export const useUi = create<UiState>()((set) => ({
   section: prefs.section ?? 'calendar',
@@ -81,8 +87,9 @@ export const useUi = create<UiState>()((set) => ({
   setCalendarView: (calendarView) => set({ calendarView }),
   anchorDate: new Date(),
   setAnchorDate: (anchorDate) => set({ anchorDate }),
-  sidebarOpen: prefs.sidebarOpen ?? true,
+  sidebarOpen: initialSidebarOpen,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+  setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
   editor: null,
   openEditor: (editor) => set({ editor, selectedOccurrenceId: null }),
   closeEditor: () => set({ editor: null }),
@@ -117,10 +124,21 @@ if (typeof localStorage !== 'undefined') {
   useUi.subscribe((s, prev) => {
     if (s.section !== prev.section || s.calendarView !== prev.calendarView || s.sidebarOpen !== prev.sidebarOpen) {
       try {
-        localStorage.setItem(PREFS_KEY, JSON.stringify({ section: s.section, calendarView: s.calendarView, sidebarOpen: s.sidebarOpen } satisfies UiPrefs))
+        // Opening/closing the mobile drawer must not overwrite the desktop split preference.
+        const sidebarOpen = isMobileViewport() ? desktopSidebarOpen : s.sidebarOpen
+        localStorage.setItem(PREFS_KEY, JSON.stringify({ section: s.section, calendarView: s.calendarView, sidebarOpen } satisfies UiPrefs))
       } catch {
         /* storage may be unavailable; prefs are optional */
       }
     }
+  })
+}
+
+if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+  // Crossing the breakpoint swaps the sidebar between a split column and an
+  // overlay drawer. Close the drawer on the way in so it never covers the app
+  // after a resize or rotation, and restore the split preference on the way out.
+  window.matchMedia(MOBILE_QUERY).addEventListener('change', (e) => {
+    useUi.getState().setSidebarOpen(e.matches ? false : desktopSidebarOpen)
   })
 }

@@ -392,11 +392,61 @@
   border: 1px solid var(--border);
 }
 
+/* Scrim behind the mobile drawer. Only ever visible under the breakpoint. */
+.sidebar-scrim {
+  display: none;
+}
+
 @media (max-width: 760px) {
-  .app {
-    grid-template-columns: 0 1fr;
-  }
+  /* The sidebar leaves the grid entirely and becomes an overlay drawer: at
+     phone widths a 248px column would leave the main area unusable. */
+  .app,
+  .app.sidebar-collapsed,
   .app.sidebar-open-mobile {
-    grid-template-columns: var(--sidebar-w) 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 60;
+    width: min(var(--sidebar-w), 84vw);
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow-lg, 0 10px 40px rgba(0, 0, 0, 0.25));
+    transform: translateX(-100%);
+    transition:
+      transform var(--t-slow) var(--ease-out),
+      opacity var(--t-slow) var(--ease-out);
+  }
+  /* Beat the desktop collapsed rule, which hides the sidebar outright. */
+  .app.sidebar-collapsed .sidebar {
+    opacity: 1;
+    pointer-events: none;
+    border-right-color: var(--border);
+  }
+  .app.sidebar-open-mobile .sidebar {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .app.sidebar-open-mobile .sidebar-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.42);
+    animation: scrim-in var(--t-fast) var(--ease-out);
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

@@ -27,7 +27,8 @@ import {
   IconLink,
 } from '../../components/Icons'
 import { ConfirmDialog } from '../../components/Modal'
-import { Popover, anchorFromEvent, type Anchor } from '../../components/Popover'
+import { Popover, type Anchor } from '../../components/Popover'
+import { anchorFromEvent } from '../../components/popoverAnchor'
 import { Tooltip } from '../../components/Tooltip'
 import { useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'

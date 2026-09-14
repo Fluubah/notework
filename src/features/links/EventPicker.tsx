@@ -47,7 +47,8 @@ export function EventPicker({ item, onClose }: { item: { type: 'note' | 'pdf'; i
     if (!e) return
     const key = item.type === 'note' ? 'linkedNoteIds' : 'linkedPdfIds'
     const set = new Set(e[key])
-    set.has(item.id) ? set.delete(item.id) : set.add(item.id)
+    if (set.has(item.id)) set.delete(item.id)
+    else set.add(item.id)
     updateEvent(e.id, { [key]: [...set] })
   }
 

@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react'
 import { ConfirmDialog, Modal } from '../../components/Modal'
-import { toast } from '../../components/Toast'
-import { repository } from '../../data'
-import { useStore } from '../../data/store'
+import { toast } from '../../components/toastStore'
+import { fileStore } from '../../data'
+import { backupFilename, createBackup, parseBackup, restoreBackup } from '../../data/backup'
+import { currentData, useStore } from '../../data/store'
 import { useUi } from '../../data/uiStore'
-import { migrate } from '../../data/localStorageRepository'
+import { useSync } from '../../data/sync/syncStore'
+import { SyncSettings } from './SyncSettings'
 
 export function SettingsDialog() {
   const open = useUi((s) => s.settingsOpen)
@@ -14,27 +16,42 @@ export function SettingsDialog() {
   const resetAll = useStore((s) => s.resetAll)
   const importData = useStore((s) => s.importData)
   const [confirmReset, setConfirmReset] = useState(false)
+  const [busy, setBusy] = useState<'export' | 'import' | null>(null)
+  const syncedAccount = useSync((s) => s.account)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const exportJson = async () => {
-    const data = await repository.load()
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `notework-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    setBusy('export')
+    try {
+      const backup = await createBackup(currentData(), fileStore)
+      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = backupFilename()
+      a.click()
+      URL.revokeObjectURL(url)
+      const pdfs = Object.keys(backup.files).length
+      toast(`Backup saved · ${formatSize(blob.size)}${pdfs ? ` · ${pdfs} PDF${pdfs === 1 ? '' : 's'}` : ''}`)
+    } catch (err) {
+      console.error(err)
+      toast('Could not create the backup')
+    } finally {
+      setBusy(null)
+    }
   }
 
   const importJson = async (file: File) => {
+    setBusy('import')
     try {
-      const data = migrate(JSON.parse(await file.text()))
-      if (!data) throw new Error('Invalid file')
-      importData(data)
-      toast('Data imported')
-    } catch {
-      toast('That file could not be imported')
+      const backup = parseBackup(await file.text())
+      importData(await restoreBackup(backup, fileStore, currentData()))
+      toast('Backup restored')
+    } catch (err) {
+      console.error(err)
+      toast(err instanceof Error ? err.message : 'That file could not be imported')
+    } finally {
+      setBusy(null)
     }
   }
 
@@ -87,17 +104,22 @@ export function SettingsDialog() {
           </div>
           <button role="switch" aria-checked={settings.showCompleted} className="switch" onClick={() => updateSettings({ showCompleted: !settings.showCompleted })} />
         </div>
+        <SyncSettings />
         <div className="settings-row">
           <div>
             <div className="label">Your data</div>
-            <div className="desc">Stored in this browser. Export a backup any time.</div>
+            <div className="desc">
+              {syncedAccount
+                ? 'Synced to your account. An export is a portable backup — it includes your PDFs.'
+                : 'Stored in this browser only. An export is your only backup — it includes your PDFs.'}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn sm" onClick={exportJson}>
-              Export
+            <button className="btn sm" onClick={exportJson} disabled={busy !== null}>
+              {busy === 'export' ? 'Exporting…' : 'Export'}
             </button>
-            <button className="btn sm" onClick={() => fileRef.current?.click()}>
-              Import
+            <button className="btn sm" onClick={() => fileRef.current?.click()} disabled={busy !== null}>
+              {busy === 'import' ? 'Importing…' : 'Import'}
             </button>
             <input
               ref={fileRef}
@@ -110,7 +132,7 @@ export function SettingsDialog() {
                 e.target.value = ''
               }}
             />
-            <button className="btn sm danger" onClick={() => setConfirmReset(true)}>
+            <button className="btn sm danger" onClick={() => setConfirmReset(true)} disabled={busy !== null}>
               Reset
             </button>
           </div>
@@ -119,7 +141,11 @@ export function SettingsDialog() {
       <ConfirmDialog
         open={confirmReset}
         title="Erase everything?"
-        message="This removes all classes, events, notes and PDFs from this browser. Export first if you want a backup."
+        message={
+          syncedAccount
+            ? 'This removes all classes, events, notes and PDFs from this browser and from your synced account, on every device. Export first if you want a backup.'
+            : 'This removes all classes, events, notes and PDFs from this browser. Export first if you want a backup.'
+        }
         confirmLabel="Erase all data"
         danger
         onCancel={() => setConfirmReset(false)}
@@ -132,4 +158,10 @@ export function SettingsDialog() {
       />
     </Modal>
   )
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }

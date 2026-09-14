@@ -1,0 +1,18 @@
+{
+  "name": "Notework — calendar, notes and PDFs",
+  "short_name": "Notework",
+  "description": "A calendar, notebook and PDF annotator for coursework, stored on your own device.",
+  "id": "./",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#4f6df5",
+  "background_color": "#f4f5f8",
+  "categories": ["productivity", "education"],
+  "icons": [
+    { "src": "./pwa-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./pwa-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./pwa-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

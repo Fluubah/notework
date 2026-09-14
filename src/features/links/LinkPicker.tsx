@@ -29,11 +29,13 @@ export function LinkPicker({ eventId, onClose }: { eventId: string; onClose: () 
   const toggle = (i: { id: string; type: 'note' | 'pdf' }) => {
     if (i.type === 'note') {
       const set = new Set(event.linkedNoteIds)
-      set.has(i.id) ? set.delete(i.id) : set.add(i.id)
+      if (set.has(i.id)) set.delete(i.id)
+      else set.add(i.id)
       updateEvent(event.id, { linkedNoteIds: [...set] })
     } else {
       const set = new Set(event.linkedPdfIds)
-      set.has(i.id) ? set.delete(i.id) : set.add(i.id)
+      if (set.has(i.id)) set.delete(i.id)
+      else set.add(i.id)
       updateEvent(event.id, { linkedPdfIds: [...set] })
     }
   }

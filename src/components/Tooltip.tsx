@@ -33,6 +33,10 @@ export function Tooltip({ content, children, delay = 450, side = 'top' }: Props)
   }
   return (
     <>
+      {/* False positive: `props` only holds event handlers, and the timer ref
+          is read when one of them fires, never during render. oxlint can't
+          see through the object literal to tell the difference. */}
+      {/* oxlint-disable-next-line react/refs */}
       {cloneElement(children, props)}
       {pos &&
         content &&

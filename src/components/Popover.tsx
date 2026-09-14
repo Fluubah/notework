@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 export interface Anchor {
@@ -76,9 +76,11 @@ export function Popover({ anchor, onClose, children, placement = 'auto', width, 
   // Latest callbacks via refs so the listeners are registered once per open,
   // not re-armed (with a frame of deafness) on every re-render.
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
   const closeOnOutsideRef = useRef(closeOnOutside)
-  closeOnOutsideRef.current = closeOnOutside
+  useEffect(() => {
+    onCloseRef.current = onClose
+    closeOnOutsideRef.current = closeOnOutside
+  })
   const isOpen = !!anchor
   useLayoutEffect(() => {
     if (!isOpen) return
@@ -114,9 +116,4 @@ export function Popover({ anchor, onClose, children, placement = 'auto', width, 
     </div>,
     document.body,
   )
-}
-
-export function anchorFromEvent(e: { currentTarget: Element; clientX?: number; clientY?: number }): Anchor {
-  const rect = e.currentTarget.getBoundingClientRect()
-  return { x: e.clientX ?? rect.left, y: e.clientY ?? rect.bottom, rect }
 }

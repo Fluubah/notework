@@ -4,8 +4,6 @@ import {
   format,
   isSameDay,
   isSameYear,
-  isToday,
-  isTomorrow,
   startOfDay,
   startOfWeek,
 } from 'date-fns'
@@ -68,8 +66,11 @@ export function relativeDue(date: Date, allDay: boolean, now: Date = new Date(),
     const datePart = isSameYear(date, now) ? format(date, 'MMM d') : format(date, 'MMM d, yyyy')
     return make(allDay ? datePart : `${datePart} at ${formatCompactTime(date)}`, 'past')
   }
-  if (isToday(date) || daysAway === 0) return make(`today${time}`, 'today')
-  if (isTomorrow(date) || daysAway === 1) return make(`tomorrow${time}`, 'tomorrow')
+  // Both branches key off `daysAway`, which is measured from `now`. The
+  // date-fns isToday/isTomorrow helpers read the real system clock instead,
+  // so using them here silently ignored the caller's `now`.
+  if (daysAway === 0) return make(`today${time}`, 'today')
+  if (daysAway === 1) return make(`tomorrow${time}`, 'tomorrow')
   if (daysAway < 7) return make(`in ${daysAway} days${time}`, 'soon')
   if (daysAway < HORIZON_DAYS) return make(`next ${format(date, 'EEEE')}${time}`, 'nextWeek')
   const datePart = isSameYear(date, now) ? format(date, 'MMM d') : format(date, 'MMM d, yyyy')
